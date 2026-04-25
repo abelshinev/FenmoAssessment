@@ -3,7 +3,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const db = new Database(path.join(__dirname, '../../data/expenses.db'));
+const dbPath = process.env.DB_PATH || path.join(__dirname, '../../data/expenses.db');
+const db = new Database(dbPath);
 
 db.pragma('journal_mode = WAL');
 
@@ -18,5 +19,7 @@ db.exec(`
     created_at  TEXT NOT NULL
   );
 `);
+
+console.log("DB HAS BEEN INITIALISED")
 
 export default db;

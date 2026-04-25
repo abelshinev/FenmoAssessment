@@ -1,3 +1,4 @@
+import './src/db/index.js';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -19,4 +20,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(PORT, () => console.log(`Server running on localhost:${PORT}`));
+export { app };
+
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => console.log(`Server running on localhost:${PORT}`));
+}
