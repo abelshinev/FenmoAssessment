@@ -1,56 +1,89 @@
-export default function ExpenseList({ expenses, status, error }) {
-  const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, Tag, FileText, IndianRupee } from 'lucide-react';
 
-  if (status === 'loading') return <p>Loading expenses…</p>;
-  if (status === 'failed')  return <p style={{ color: 'red' }}>Error: {error}</p>;
+export default function ExpenseList({ expenses, status, error }) {
+  if (status === 'loading' && expenses.length === 0) {
+    return (
+      <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--muted-foreground)' }}>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+          style={{ display: 'inline-block', marginBottom: '1rem' }}
+        >
+          <div style={{ width: '2rem', height: '2rem', border: '2px solid var(--border)', borderTopColor: 'var(--foreground)', borderRadius: '50%' }} />
+        </motion.div>
+        <p>Loading your expenses...</p>
+      </div>
+    );
+  }
+
+  if (status === 'failed') {
+    return (
+      <div style={{ padding: '4rem', textAlign: 'center', color: '#ef4444' }}>
+        <p>Error: {error}</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h3>Expenses</h3>
-        <p style={{ 
-          margin: 0, 
-          fontSize: '1.2rem', 
-          backgroundColor: '#333', 
-          color: '#fff', 
-          padding: '0.5rem 1rem', 
-          borderRadius: '20px' 
-        }}>
-          <strong>Total: ₹{total.toFixed(2)}</strong> 
-          <span style={{ fontSize: '0.9rem', opacity: 0.8, marginLeft: '0.5rem' }}>
-            ({expenses.length} item{expenses.length !== 1 ? 's' : ''})
-          </span>
-        </p>
-      </div>
-
-      {expenses.length === 0 ? (
-        <p style={{ textAlign: 'center', padding: '2rem', background: '#f9f9f9' }}>No expenses found.</p>
-      ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left' }}>
-              <th style={{ padding: '0.5rem' }}>Date</th>
-              <th style={{ padding: '0.5rem' }}>Category</th>
-              <th style={{ padding: '0.5rem' }}>Description</th>
-              <th style={{ padding: '0.5rem', textAlign: 'right' }}>Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {expenses.map(e => (
-              <tr key={e.id} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '0.5rem' }}>{e.date}</td>
-                <td style={{ padding: '0.5rem' }}>
-                  <span style={{ padding: '0.2rem 0.5rem', borderRadius: '4px', background: '#eee', fontSize: '0.8rem' }}>
-                    {e.category}
-                  </span>
+      <table style={{ minWidth: '600px' }}>
+        <thead>
+          <tr>
+            <th><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Calendar size={14} /> Date</div></th>
+            <th><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Tag size={14} /> Category</div></th>
+            <th><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FileText size={14} /> Description</div></th>
+            <th style={{ textAlign: 'right' }}><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}><IndianRupee size={14} /> Amount</div></th>
+          </tr>
+        </thead>
+        <motion.tbody layout>
+          <AnimatePresence mode="popLayout">
+            {expenses.length === 0 ? (
+              <motion.tr
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <td colSpan="4" style={{ textAlign: 'center', padding: '4rem', color: 'var(--muted-foreground)' }}>
+                  No records found. Start by adding an expense.
                 </td>
-                <td style={{ padding: '0.5rem' }}>{e.description}</td>
-                <td style={{ padding: '0.5rem', textAlign: 'right' }}>₹{e.amount.toFixed(2)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+              </motion.tr>
+            ) : (
+              expenses.map(e => (
+                <motion.tr
+                  key={e.id}
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ backgroundColor: 'var(--background)' }}
+                  whileHover={{ backgroundColor: 'var(--muted)' }}
+                >
+                  <td style={{ color: 'var(--muted-foreground)', whiteSpace: 'nowrap' }}>{e.date}</td>
+                  <td>
+                    <span style={{ 
+                      fontSize: '0.75rem', 
+                      fontWeight: 600, 
+                      textTransform: 'uppercase', 
+                      padding: '0.25rem 0.5rem', 
+                      borderRadius: '4px', 
+                      backgroundColor: 'var(--muted)',
+                      border: '1px solid var(--border)'
+                    }}>
+                      {e.category}
+                    </span>
+                  </td>
+                  <td style={{ fontWeight: 500 }}>{e.description}</td>
+                  <td style={{ textAlign: 'right', fontWeight: 600, fontSize: '1rem' }}>
+                    ₹{e.amount.toFixed(2)}
+                  </td>
+                </motion.tr>
+              ))
+            )}
+          </AnimatePresence>
+        </motion.tbody>
+      </table>
     </div>
   );
 }
