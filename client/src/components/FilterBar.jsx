@@ -20,7 +20,7 @@ export default function FilterBar({ filters, onChange }) {
         style={{ padding: '0.3rem' }}
       >
         <option value="date_desc">Newest First</option>
-        {/* We could add more sort options here later */}
+        <option value="date_asc">Oldest First</option>
       </select>
     </div>
   );

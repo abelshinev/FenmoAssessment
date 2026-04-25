@@ -8,7 +8,19 @@ export default function ExpenseList({ expenses, status, error }) {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h3>Expenses</h3>
-        <p><strong>Total: ₹{total.toFixed(2)}</strong> ({expenses.length} item{expenses.length !== 1 ? 's' : ''})</p>
+        <p style={{ 
+          margin: 0, 
+          fontSize: '1.2rem', 
+          backgroundColor: '#333', 
+          color: '#fff', 
+          padding: '0.5rem 1rem', 
+          borderRadius: '20px' 
+        }}>
+          <strong>Total: ₹{total.toFixed(2)}</strong> 
+          <span style={{ fontSize: '0.9rem', opacity: 0.8, marginLeft: '0.5rem' }}>
+            ({expenses.length} item{expenses.length !== 1 ? 's' : ''})
+          </span>
+        </p>
       </div>
 
       {expenses.length === 0 ? (

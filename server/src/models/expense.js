@@ -37,9 +37,13 @@ export function query({ category, sort } = {}) {
     params.push(category);
   }
 
-  sql += sort === 'date_desc'
-    ? ' ORDER BY date DESC, created_at DESC'
-    : ' ORDER BY created_at DESC';
+  if (sort === 'date_desc') {
+    sql += ' ORDER BY date DESC, created_at DESC';
+  } else if (sort === 'date_asc') {
+    sql += ' ORDER BY date ASC, created_at ASC';
+  } else {
+    sql += ' ORDER BY created_at DESC';
+  }
 
   return db.prepare(sql).all(...params).map(serialize);
 }
