@@ -1,38 +1,176 @@
-# Expense Tracker - Technical Assessment
+# Expense Tracker (Fenmo Assessment)
 
-A minimal full-stack Expense Tracker built for Fenmo's technical assessment.
+## Overview
 
-## Key Design Decisions
+This is a minimal full-stack expense tracking application that allows users to create, view, filter, and analyze their expenses.
+
+The system is designed to behave correctly under real-world conditions such as retries, duplicate submissions, and page refreshes.
+
+---
+
+## Live Links
+
+* Frontend: https://your-vercel-app.vercel.app
+* Backend API: https://fenmoassessment.onrender.com
+
+---
+
+## Features
 
 ### Backend
-- **SQLite with WAL:** Chosen for zero-config persistence with excellent performance for concurrent reads and writes.
-- **Paise for Money:** Amounts are stored as integers (paise) in the database to eliminate floating-point rounding errors entirely.
-- **Server-Side Idempotency:** Implemented using a unique `idem_key` passed from the client. This ensures that network retries or page refreshes don't result in duplicate transactions.
-- **ES Modules:** Used modern Node.js ES modules for a cleaner, future-proof codebase.
+
+* `POST /expenses`
+  Create a new expense (amount, category, description, date)
+
+  * Handles retries safely using idempotency keys
+* `GET /expenses`
+
+  * Returns all expenses
+  * Supports:
+
+    * `category` filter
+    * `sort=date_desc`
+
+---
 
 ### Frontend
-- **"Adjust Render" Pattern:** Custom `useExpenses` hook uses the "adjusting state during render" pattern to avoid cascading re-renders, ensuring a smooth transition to loading states.
-- **Double-Submit Protection:** The form blocks multiple clicks while a request is in flight.
-- **Resilient Idempotency:** The client-side idempotency key persists across failed retries and only regenerates upon a successful response.
+
+* Add expense form
+* Expense list/table
+* Filter by category
+* Sort by newest date
+* Total of visible expenses
+
+---
+
+## Design Decisions
+
+### 1. Idempotency (Core Focus)
+
+To handle retries and duplicate submissions, the backend supports an `Idempotency-Key` header.
+
+* Same key → same result (no duplicate records)
+* Different key → treated as a new request
+
+This ensures correctness under:
+
+* multiple clicks
+* network retries
+* page refreshes
+
+---
+
+### 2. Database Choice (SQLite)
+
+SQLite (via `better-sqlite3`) was used because:
+
+* simple setup (no external service required)
+* synchronous and reliable
+* suitable for small-scale systems
+
+The database is automatically initialized on server startup.
+
+---
+
+### 3. Data Modeling
+
+* `amount` stored as `REAL` to handle decimal values correctly
+* `idem_key` stored as `UNIQUE` to enforce idempotency at DB level
+* `created_at` stored for ordering and tracking
+
+---
+
+### 4. System Structure
+
+* Monorepo with:
+
+  * `/client` → frontend (Vite)
+  * `/server` → backend (Express)
+* Clear separation between API, models, and DB logic
+
+---
+
+## Handling Real-World Conditions
+
+The system is designed to behave correctly under:
+
+* Multiple submit clicks
+* Network retries
+* Slow or failed API responses
+* Page refresh after submission
+
+Idempotency ensures no duplicate records are created in these scenarios.
+
+---
 
 ## Trade-offs
-- **Styling:** Focused on functional clarity and accessibility over complex CSS frameworks to stay within the timebox.
-- **Testing:** Implemented core logic verification via scratch scripts and manual E2E testing instead of a full Jest/Cypress suite.
-- **Categories:** Hardcoded categories in the UI/Model for simplicity; a production version would likely have a separate categories table/endpoint.
 
-## Intentionally Not Done
-- **Authentication:** Omitted as it was outside the core requirements for this minimal stack.
-- **Pagination:** Not implemented as the current use case focuses on a small list of personal expenses.
-- **Edit/Delete:** Focused strictly on the core requirements of creating and viewing/filtering expenses.
+Due to the time constraint:
 
-## How to Run
+* Used SQLite with local file storage (ephemeral on deployment)
+* No authentication layer
+* No pagination (small dataset assumption)
+* Minimal UI styling
+
+In a production system:
+
+* A persistent database (e.g., PostgreSQL) would be used
+* Authentication and rate limiting would be added
+
+---
+
+## What Was Not Done
+
+* Automated tests
+* Advanced UI/UX improvements
+* Category summaries or analytics
+
+These were deprioritized in favor of correctness and system behavior.
+
+---
+
+## Testing
+
+Idempotency and retry safety were tested by:
+
+* Sending multiple POST requests with the same idempotency key
+* Verifying no duplicate records were created
+* Simulating retries via manual requests and browser tools
+
+---
+
+## Tech Stack
+
+* Frontend: Vite + JavaScript
+* Backend: Node.js + Express
+* Database: SQLite (`better-sqlite3`)
+* Deployment:
+
+  * Frontend → Vercel
+  * Backend → Render
+
+---
+
+## Running Locally
 
 ### Backend
-1. `cd server`
-2. `npm install`
-3. `npm run start` (Starts on port 3000)
+
+```bash
+cd server
+npm install
+node server.js
+```
 
 ### Frontend
-1. `cd client`
-2. `npm install`
-3. `npm run dev` (Starts on port 5173)
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+---
+
+## Final Note
+
+The focus of this implementation was on correctness, simplicity, and reliability under real-world conditions rather than feature breadth.
