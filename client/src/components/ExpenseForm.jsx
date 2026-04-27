@@ -4,7 +4,11 @@ import { Send, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { createExpense } from '../api/expenses';
 
 const CATEGORIES = ['Food', 'Transport', 'Housing', 'Entertainment', 'Health', 'Other'];
-const today = () => new Date().toISOString().split('T')[0];
+const today = () => {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().split('T')[0];
+};
 
 export default function ExpenseForm({ onSuccess }) {
   const [fields, setFields] = useState({ amount: '', category: 'Food', description: '', date: today() });
